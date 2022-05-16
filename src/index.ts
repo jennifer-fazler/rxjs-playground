@@ -1,19 +1,18 @@
-import { Observable } from "rxjs";
-import { ajax } from "rxjs/ajax";
+import { Observable, of } from "rxjs";
 
-//S4.33
-
-const helloButton = document.querySelector("button#hello");
-
-const helloClick$ = new Observable<MouseEvent>((subscriber) => {
-  helloButton.addEventListener("click", (event) => {
-    subscriber.next(event as MouseEvent);
-  });
+//S5.37
+// of('Alice', 'Ben', 'Charlie').subscribe({
+ourOwnOf("Alice", "Ben", "Charlie").subscribe({
+  next: (value) => console.log(value),
+  complete: () => console.log("Completed"),
 });
 
-helloClick$.subscribe((event: MouseEvent) => console.log('Sub 1:', event.type, event.x, event.y));
-
-setTimeout(() => {
-  console.log('Subscription 2 starts');
-  helloClick$.subscribe((event: MouseEvent) => console.log('Sub 2:', event.type, event.x, event.y));
-}, 5000);
+// create a function which operates just like the 'of' creator function
+function ourOwnOf(...args: string[]): Observable<string> {
+  return new Observable<string>((subscriber) => {
+    for (let index = 0; index < args.length; index++) {
+      subscriber.next(args[index]);
+    }
+    subscriber.complete();
+  });
+}
