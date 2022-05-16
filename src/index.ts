@@ -1,31 +1,25 @@
-import { fromEvent, Observable, Subscriber } from "rxjs";
+import { Observable, timer } from "rxjs";
 
-const triggerButton = document.querySelector('button#trigger');
+console.log('App started');
 
-// const subscription = fromEvent<MouseEvent>(triggerButton, 'click').subscribe(
-//   event => console.log(event.type, event.x, event.y)
-// );
+// our implementation of timer
+const timer$ = new Observable<number>(subscriber => {
+  const timeoutId = setTimeout(() => {
+    console.log('Timeout!');
+    subscriber.next(0);
+    subscriber.complete();
+  }, 2000);
 
+  return () => clearTimeout(timeoutId);
+})
 
-// create code to replicate fromEvent
-const triggerClick$ = new Observable<MouseEvent>(subscriber => {
-  const clickHandlerFn = (event:MouseEvent) => {
-    console.log('Event callback executed');
-    subscriber.next(event);
-  };
-
-  triggerButton.addEventListener('click', clickHandlerFn);
-
-  return () => {
-    triggerButton.removeEventListener('click', clickHandlerFn);
-  }
+// const subscription = timer(2000).subscribe({
+const subscription = timer$.subscribe({
+  next: value => console.log(value),
+  complete: () => console.log('Completed!')
 });
 
-const subscription = triggerClick$.subscribe(
-  event => console.log(event.type, event.x, event.y)
-)
-
 setTimeout(() => {
-  console.log('Unsubscribe');
   subscription.unsubscribe();
-}, 5000);
+  console.log('Unsubscribe');
+}, 1000);
