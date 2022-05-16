@@ -1,14 +1,15 @@
 import { Observable } from "rxjs";
 
-//S3.26
+//S3.28
 const observable$ = new Observable<string>((subscriber) => {
   console.log("Observable executed");
   subscriber.next("Alice");
   subscriber.next("Ben");
+  setTimeout(() => subscriber.error(new Error('Failure')), 2000);
   setTimeout(() => {
     subscriber.next("Charlie");
-  }, 2000);
-  setTimeout(() => subscriber.error(new Error('Failure')), 4000);
+    subscriber.complete();
+  }, 4000);
 
   return () => {
     console.log("Teardown");
