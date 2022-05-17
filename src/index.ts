@@ -1,11 +1,17 @@
-import { debounceTime, fromEvent, map } from "rxjs";
+import { catchError, EMPTY, Observable, of } from "rxjs";
 
-const sliderInput = document.querySelector('input#slider');
+const failingHttpRequest$ = new Observable(subscriber => {
+  setTimeout(() => {
+    subscriber.error(new Error('Timeout'));
+  }, 3000);
+});
 
-// fromEvent(sliderInput, 'input').subscribe(value => console.log(value));
+console.log('App started');
 
-fromEvent(sliderInput, 'input').pipe(
-  debounceTime(2000),
-  map(event => (event.target as HTMLInputElement).value)
-).subscribe(value => console.log(value));
-
+failingHttpRequest$.pipe(
+  // catchError(error => of('Fallback value'))
+  catchError(() => EMPTY)
+).subscribe({
+  next: value => console.log(value),
+  complete: () => console.log('Completed')
+});
