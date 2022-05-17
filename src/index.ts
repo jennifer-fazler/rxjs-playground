@@ -1,27 +1,20 @@
-import { interval, Observable, timer } from "rxjs";
+import { ajax } from "rxjs/ajax";
+import { forkJoin } from "rxjs";
 
-console.log('App started');
+const randomName$ = ajax<any>('https://random-data-api.com/api/name/random_name');
+const randomNation$ = ajax<any>('https://random-data-api.com/api/nation/random_nation');
+const randomFood$ = ajax<any>('https://random-data-api.com/api/food/random_food');
 
-// our implementation of interval
-const interval$ = new Observable<number>(subscriber => {
-  let counter = 0;
-  
-  const intervalId = setInterval(() => {
-    console.log('Timeout!');
-    subscriber.next(counter++);
-  }, 1000);
+// randomName$.subscribe(ajaxResponse => console.log(ajaxResponse));
+// randomNation$.subscribe(ajaxResponse => console.log(ajaxResponse));
+// randomFood$.subscribe(ajaxResponse => console.log(ajaxResponse));
 
-  return () => clearInterval(intervalId);
-})
+randomName$.subscribe(ajaxResponse => console.log(ajaxResponse.response.first_name));
+randomNation$.subscribe(ajaxResponse => console.log(ajaxResponse.response.capital));
+randomFood$.subscribe(ajaxResponse => console.log(ajaxResponse.response.dish));
 
-// const subscription = timer(2000).subscribe({
-// const subscription = interval(1000).subscribe({
-const subscription = interval$.subscribe({
-  next: value => console.log(value),
-  complete: () => console.log('Completed!')
-});
-
-setTimeout(() => {
-  subscription.unsubscribe();
-  console.log('Unsubscribe');
-}, 5000);
+forkJoin([randomName$, randomNation$, randomFood$]).subscribe(
+  // (ajaxReponses) => console.log(ajaxResponses)
+  ([nameAjax, nationAjax, foodAjax]) => 
+  console.log(`${nameAjax.response.first_name} is from ${nationAjax.response.capital} and likes to eat ${foodAjax.response.dish}`)
+);
