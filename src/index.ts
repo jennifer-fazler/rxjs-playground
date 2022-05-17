@@ -1,30 +1,28 @@
-import { combineLatest, combineLatestWith, fromEvent, Observable } from "rxjs";
+import { filter, Observable } from "rxjs";
 
-const temperatureInput = document.getElementById('temperature-input');
-const conversionDropdown = document.getElementById('conversion-dropdown');
-const resultText = document.getElementById('result-text');
+interface NewsItem {
+  category: 'Business' | 'Sports';
+  content: string;
+}
 
-// const a$ = new Observable<number>();
+const newsFeed$ = new Observable<NewsItem>(subscriber => {
+  setTimeout(() => subscriber.next({ category: 'Business', content: 'A' }), 1000);
+  setTimeout(() => subscriber.next({ category: 'Sports', content: 'B' }), 3000);
+  setTimeout(() => subscriber.next({ category: 'Business', content: 'C' }), 4000);
+  setTimeout(() => subscriber.next({ category: 'Sports', content: 'D' }), 6000);
+  setTimeout(() => subscriber.next({ category: 'Business', content: 'E' }), 7000);
+});
 
-const tempInputEvent$ = fromEvent<InputEvent>(temperatureInput, 'input');
-const conversionInputEvent$ = fromEvent<InputEvent>(conversionDropdown, 'input');
+// newsFeed$.subscribe(item => console.log(item));
 
-combineLatest([tempInputEvent$, conversionInputEvent$]).subscribe(
-  ([tempEvent, convEvent]) => {
-    // console.log((tempEvent.target as HTMLInputElement).value, 
-    // (convEvent.target as HTMLInputElement).value);
+// newsFeed$.pipe(
+//   //... allows us to provide the pipeable operators
+//   filter(item => item.category === 'Sports')
+// ).subscribe(item => console.log(item));
 
-    const temperature = Number((tempEvent.target as HTMLInputElement).value);
-    const conversion = (convEvent.target as HTMLInputElement).value;
-
-    let result: number;
-
-    if (conversion === 'f-to-c') {
-      result = (temperature - 32) * 5/9;
-    } else if (conversion === 'c-to-f') {
-      result = temperature * 9/5 + 32;
-    }
-
-    resultText.innerText = String(result);
-  }
+// this method allows the original feed to exist in case we also want all of the newsfeed items somewhere else
+const sportsNewsFeed$ = newsFeed$.pipe(
+  filter(item => item.category === 'Sports')
 );
+sportsNewsFeed$.subscribe(item => console.log(item)); 
+
