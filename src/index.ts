@@ -1,28 +1,23 @@
-import { filter, Observable } from "rxjs";
 
-interface NewsItem {
-  category: 'Business' | 'Sports';
-  content: string;
-}
+import { forkJoin, map } from "rxjs";
+// Mike is from New Delhi and likes to eat pasta.
 
-const newsFeed$ = new Observable<NewsItem>(subscriber => {
-  setTimeout(() => subscriber.next({ category: 'Business', content: 'A' }), 1000);
-  setTimeout(() => subscriber.next({ category: 'Sports', content: 'B' }), 3000);
-  setTimeout(() => subscriber.next({ category: 'Business', content: 'C' }), 4000);
-  setTimeout(() => subscriber.next({ category: 'Sports', content: 'D' }), 6000);
-  setTimeout(() => subscriber.next({ category: 'Business', content: 'E' }), 7000);
-});
+import { ajax } from "rxjs/ajax";
 
-// newsFeed$.subscribe(item => console.log(item));
+const randomFirstName$ = ajax<any>('https://random-data-api.com/api/name/random_name')
+.pipe(map(ajaxReponse => ajaxReponse.response.first_name));
 
-// newsFeed$.pipe(
-//   //... allows us to provide the pipeable operators
-//   filter(item => item.category === 'Sports')
-// ).subscribe(item => console.log(item));
+const randomCapital$ = ajax<any>('https://random-data-api.com/api/nation/random_nation')
+.pipe(map(ajaxReponse => ajaxReponse.response.capital));
 
-// this method allows the original feed to exist in case we also want all of the newsfeed items somewhere else
-const sportsNewsFeed$ = newsFeed$.pipe(
-  filter(item => item.category === 'Sports')
+const randomDish$ = ajax<any>('https://random-data-api.com/api/food/random_food')
+.pipe(map(ajaxReponse => ajaxReponse.response.dish));
+
+
+// randomFirstName$.subscribe(value => console.log(value));
+// randomCapital$.subscribe(value => console.log(value));
+// randomDish$.subscribe(value => console.log(value));
+
+forkJoin([randomFirstName$, randomCapital$, randomDish$]).subscribe(
+  ([firstName, capital, dish]) => console.log(`${firstName} is from ${capital} and likes to eat ${dish}.`)
 );
-sportsNewsFeed$.subscribe(item => console.log(item)); 
-
