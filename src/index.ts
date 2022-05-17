@@ -1,28 +1,30 @@
-import { forkJoin, Observable } from "rxjs";
+import { combineLatest, combineLatestWith, fromEvent, Observable } from "rxjs";
 
-const a$ = new Observable(subscriber => {
-  setTimeout(() => {
-    subscriber.next('A');
-    subscriber.complete();
-  }, 5000);
+const temperatureInput = document.getElementById('temperature-input');
+const conversionDropdown = document.getElementById('conversion-dropdown');
+const resultText = document.getElementById('result-text');
 
-  return () => {
-    console.log('A teardown');
+// const a$ = new Observable<number>();
+
+const tempInputEvent$ = fromEvent<InputEvent>(temperatureInput, 'input');
+const conversionInputEvent$ = fromEvent<InputEvent>(conversionDropdown, 'input');
+
+combineLatest([tempInputEvent$, conversionInputEvent$]).subscribe(
+  ([tempEvent, convEvent]) => {
+    // console.log((tempEvent.target as HTMLInputElement).value, 
+    // (convEvent.target as HTMLInputElement).value);
+
+    const temperature = Number((tempEvent.target as HTMLInputElement).value);
+    const conversion = (convEvent.target as HTMLInputElement).value;
+
+    let result: number;
+
+    if (conversion === 'f-to-c') {
+      result = (temperature - 32) * 5/9;
+    } else if (conversion === 'c-to-f') {
+      result = temperature * 9/5 + 32;
+    }
+
+    resultText.innerText = String(result);
   }
-});
-
-const b$ = new Observable(subscriber => {
-  setTimeout(() => {
-    subscriber.error('Failure!');
-  }, 3000);
-
-  return () => {
-    console.log('B teardown');
-  }
-});
-
-forkJoin([a$, b$]).subscribe({
-  next: value => console.log(value),
-  error: err => console.log('Error:', err)
-});
-
+);
